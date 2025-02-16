@@ -44,7 +44,24 @@ resource "aws_route_table_association" "mtc_public_assoc" {
   subnet_id      = aws_subnet.mtc_public_subnet.id
   route_table_id = aws_route_table.mtc_public_rt.id
 }
-resource "aws_key_pair" "mtc_key" {
+resource "aws_key_pair" "mtc_auth" {
   key_name   = "mtc_key"
   public_key = file("~/.ssh/mtckey.pub")
+}
+resource "aws_instance" "mtc_node" {
+  instance_type = "t2.micro"
+  ami           = data.aws_ami.server_ami.id
+  vpc_security_group_ids = [aws_security_group.mtc_sg.id]
+  subnet_id     = aws_subnet.mtc_public_subnet.id
+
+    tags = {
+        Name = "dev_node"
+    }
+    key_name = aws_key_pair.mtc_auth.id
+
+
+    root_block_device {
+      volume_size = 10
+    }
+    
 }
